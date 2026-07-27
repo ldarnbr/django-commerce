@@ -56,6 +56,17 @@ def register(client):
         print("Error: ", error_message)
         return None
 
+def checkout_basket(client):
+    # Server side handles checks for stock, updating the db and serving the success/fail messages.
+    server_response = client.post(f"{URL}/checkout/")
+
+    if server_response.status_code == 200:
+        print(f"{server_response.json()['message']}")
+        return True
+    else:
+        print(f"{server_response.json()['error']}")
+        return False
+
 def view_basket(client):
 
     server_response = client.get(f"{URL}/shopping_basket/")
@@ -82,7 +93,13 @@ def view_basket(client):
         command = input(": ")
 
         if command == '1':
-            print("Checkout not yet available")
+            successful_checkout = checkout_basket(client)
+            if successful_checkout:
+                return
+            else:
+                # This should only happen if the item is out of stock.
+                # Allows the user to update their basket because of this.
+                view_basket(client)
 
         # Item quantities can be reduced one at a time by inputting the ID.
         # Function has recursion to prompt the customer for another action until they're finished.
@@ -107,6 +124,31 @@ def view_basket(client):
         error_message = server_response.json()['error']
         print("Error: ", error_message)
 
+def view_orders(client):
+    server_response = client.get(f"{URL}/view_orders/")
+
+    if server_response.status_code == 200:
+        orders = server_response.json()
+
+        if len(orders) == 0:
+            print("\nNo order history\n")
+            return
+        for order in orders:
+            print(f"\nOrder ID: {order['order_id']}:")
+            combined_total = 0.0
+
+            for item in order['items']:
+                print(f"{item['quantity']} x {item['name']} - {item['price']}/ea")
+                combined_total += (float(item['price']) * int(item['quantity']))
+
+            print(f"Order Total: £{combined_total:.2f}")
+            print("\n -----------------------------------------------------------")
+    else:
+        error_message = server_response.json()['error']
+        print("Error: ", error_message)
+
+    return
+
 def main():
     # Creates a session to keep the user logged in
     client = requests.Session()
@@ -114,8 +156,9 @@ def main():
     # Flag keeps track of if a user is logged in to dynamically present login/logout buttons.
     logged_in = None
 
+    print("\n")
+
     while True:
-        print("\n")
         if logged_in:
             print("1) Logout")
             print("2) Check Basket")
@@ -152,6 +195,17 @@ def main():
         elif command == '3':
             print("\nShopping Screen----------------------")
             # Needs to have sale filter functionality as well as search.
+
+        elif command == '4':
+            if logged_in:
+                print("\nOrder History----------------------")
+                view_orders(client)
+                pass
+
+            # If the user isnt logged in, they can't view previous orders.
+            else:
+                print("\nError: command not found. Usage examples: | Enter <1> for login | Enter <exit> to close application |")
+
         elif command == 'exit':
             print("\nExit Message------------------------")
             break

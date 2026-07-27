@@ -277,3 +277,33 @@ def checkout(request):
         basket_items.delete()
 
         return JsonResponse({'message': f'\n>>> Your order #{order.id} has been received.\n'})
+
+@csrf_exempt
+def view_orders(request):
+    if request.method == 'GET':
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': '\n>>> You must login to view your order history.\n'}, status=401)
+
+        # Filter all orders in the databse byt the logged in user.
+        orders = Order.objects.filter(customer=request.user)
+        orders_information = []
+
+        # Iterate through all orders, and handle each orders items separately.
+        for order in orders:
+            order_items = OrderItem.objects.filter(order=order)
+            items = []
+
+            # All items in each order are stored in a list grouped by order id.
+            for item in order_items:
+                items.append({
+                    'name': item.item.name,
+                    'quantity': item.quantity,
+                    'price': str(item.price)
+                })
+
+            orders_information.append({
+                'order_id': order.id,
+                'items': items
+            })
+
+        return JsonResponse(orders_information, safe=False)
