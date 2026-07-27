@@ -16,11 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from api.views import login, register, item, shopping, sale, shopping_basket, checkout
+from api.views import login, logout, register, item, shopping, sale, shopping_basket, checkout
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/login/', login),
+    path('api/logout/', logout),
     path('api/register/', register),
     # Items expects an item id to be passed in the URL to get specific item details.
     path('api/items/<int:item_id>/', item),

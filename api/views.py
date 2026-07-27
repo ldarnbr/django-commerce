@@ -5,7 +5,7 @@ import json
 # Lecture 6 on Django
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login as auth
+from django.contrib.auth import authenticate, login as auth, logout as deauth
 
 # Create your views here.
 @csrf_exempt
@@ -22,12 +22,20 @@ def login(request):
             # Credentials matched so set up their login session.
             auth(request, user)
             return JsonResponse({
-                'message': f'{username} Logged in successfully.'
+                'message': f'\n>>> {username} Logged in successfully.\n'
             })
         else:
             return JsonResponse({
-                'error': 'Invalid Username or Password.'
+                'error': '\n>>> Invalid Username or Password.\n'
             }, status=400)
+
+@csrf_exempt
+def logout(request):
+    if request.method == 'POST':
+        # Remove session in the server
+        deauth(request)
+        return JsonResponse({'message': '\n>>> Logged out successfully\n'}, status=200)
+    return JsonResponse({'error': '\n>>> Invalid request method\n'}, status=400)
 
 @csrf_exempt
 def register(request):
@@ -39,18 +47,18 @@ def register(request):
         # Web form will make these required fields but just incase as a security measure i'll check here too.
         if not username:
             return JsonResponse({
-                'error': 'Username required'
+                'error': '\n>>> Username required\n'
             }, status=400)
 
         if not password:
             return JsonResponse({
-                'error': 'Password required'
+                'error': '\n>>> Password required\n'
             }, status=400)
 
         # Check username doesn't exist already
         if User.objects.filter(username=username).exists():
             return JsonResponse({
-                'error': 'Username taken.'
+                'error': '\n>>> Username taken.\n'
             }, status=400)
 
         user = User.objects.create_user(username=username, password=password)
@@ -61,7 +69,7 @@ def register(request):
         # Also log the user in immediately.
         auth(request, user)
         
-        return JsonResponse({'message': f'Account created, welcome to the platform {username}!'})
+        return JsonResponse({'message': f'\n>>> Account created, welcome to the platform {username}!\n'})
 
 def item(request, item_id):
     if request.method == 'GET':
@@ -138,7 +146,7 @@ def shopping_basket(request):
 
     # Need to login before seeing basket.
     if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Please login to view or add items to basket.'}, status=401)
+        return JsonResponse({'error': '\n>>> Please login to view or add items to basket.\n'}, status=401)
 
     # Get the basket for the logged in user.
     basket, basket_created = ShoppingBasket.objects.get_or_create(customer=request.user)
@@ -177,7 +185,7 @@ def shopping_basket(request):
         # Must check existing basket items against stock to check order can be fulfilled.
         if basket_item.quantity + 1 > item_request.stock_count:
             return JsonResponse({
-                'error': f'Maximum quantity reached.'
+                'error': f'\n>>> Maximum quantity reached.\n'
             }, status=400)
 
         # Increment the quantity in the database and save it.
@@ -185,7 +193,7 @@ def shopping_basket(request):
         basket_item.save()
 
         return JsonResponse({
-            'message': f'Added {item_request.name} to the basket.',
+            'message': f'\n>>> Added {item_request.name} to the basket.\n',
             'quantity': basket_item.quantity
         })
 
@@ -197,7 +205,7 @@ def shopping_basket(request):
         basket_item = BasketItem.objects.filter(basket=basket, item_id=item_id).first()
 
         if not basket_item:
-            return JsonResponse({'error': 'Item not found to delete.'}, status=404)
+            return JsonResponse({'error': '\n>>> Item not found to delete.\n'}, status=404)
 
         # Handles quantity reduction instead of entire removal from basket.
         # Would benefit from being a separate action so customer can completely
@@ -206,12 +214,12 @@ def shopping_basket(request):
             basket_item.quantity -= 1
             basket_item.save()
             return JsonResponse({
-                'message': 'Quantity Reduced.'
+                'message': '\n>>> Quantity Reduced.\n'
             })
         else:
             basket_item.delete()
             return JsonResponse({
-                'message': 'Item removed from basket.'
+                'message': '\n>>> Item removed from basket.\n'
             })
 
 @csrf_exempt
@@ -220,7 +228,7 @@ def checkout(request):
 
         # Need to make sure user is logged in first.
         if not request.user.is_authenticated:
-            return JsonResponse({'error': 'You must login to checkout.'}, status=401)
+            return JsonResponse({'error': '\n>>> You must login to checkout.\n'}, status=401)
 
         # Check basket exists for customer.
         basket = ShoppingBasket.objects.filter(customer=request.user).first()
@@ -228,14 +236,14 @@ def checkout(request):
         # Throw error when basket doesn't exist but user tries to check out.
         if not basket:
             return JsonResponse({
-                'error': 'No basket created. Please add items to basket before checking out.'
+                'error': '\n>>> No basket created. Please add items to basket before checking out.\n'
             }, status=400)
 
         basket_items = BasketItem.objects.filter(basket=basket)
 
         # Check items are present in the created basket.
         if not basket_items:
-            return JsonResponse({'error': 'Basket is empty'}, status=400)
+            return JsonResponse({'error': '\n>>> Basket is empty\n'}, status=400)
 
         # Need to check theres enough stock to fulfil the order.
         # Prompts the customer with a message depending on if item is out of stock or not enough stock.
@@ -243,11 +251,11 @@ def checkout(request):
             if basket_item.item.stock_count < basket_item.quantity:
                 if basket_item.item.stock_count <= 0:
                     return JsonResponse({
-                        'error': f'{basket_item.item.name} is no longer in stock.'
+                        'error': f'\n>>>{basket_item.item.name} is no longer in stock.\n'
                     }, status=400)
                 else:
                     return JsonResponse({
-                        'error': f'Only {basket_item.item.stock_count} x {basket_item.item.name} remaining in stock, please update quantity.'
+                        'error': f'\n>>> Only {basket_item.item.stock_count} x {basket_item.item.name} remaining in stock, please update quantity.\n'
                     }, status=400)
 
 
@@ -268,4 +276,4 @@ def checkout(request):
         # Empty the basket in the db.
         basket_items.delete()
 
-        return JsonResponse({'message': f'Your order #{order.id} has been received.'})
+        return JsonResponse({'message': f'\n>>> Your order #{order.id} has been received.\n'})
