@@ -142,7 +142,7 @@ def view_orders(client):
                 combined_total += (float(item['price']) * int(item['quantity']))
 
             print(f"Order Total: £{combined_total:.2f}")
-            print("\n -----------------------------------------------------------")
+            print("\n------------------------------------------------")
     else:
         error_message = server_response.json()['error']
         print("Error: ", error_message)
@@ -151,8 +151,10 @@ def view_orders(client):
 
 def browse_products(client):
     while True:
-        print("Product pages-----------------------------------")
-        print("1) View All")
+
+        print("\n-------------------------|Item Browser|-----------------------")
+
+        print("\n1) View All")
         print("2) Search Items")
         print("3) Sale")
         print("4) Home\n")
@@ -165,13 +167,17 @@ def browse_products(client):
 
         if command == '1':
             # The default behaviour of the application is to show all items.
+            title_flag = "All Items"
             pass
         elif command == '2':
-            user_search = input("Please input your search terms: ")
+            user_search = input("\nPlease input your search terms: ")
             search_url = f"{URL}/shopping/?search={user_search}"
+            title_flag = "Search Results"
         elif command == '3':
             search_url = f"{URL}/sale/"
+            title_flag = "Sale Items"
         elif command == '4':
+            print("\n")
             return
         else:
             print("Error: command not found. Usage examples: | Enter <1> to see all items | Enter <3> to view items on sale |")
@@ -184,7 +190,7 @@ def browse_products(client):
                 print("\nThere are no products available at the moment. Please check back later.\n")
                 continue
 
-            print("\n All items:")
+            print(f"\n-------------------------|{title_flag}|-----------------------\n")
             for item in items:
                 # Don't show out of stock items.
                 if int(item['stock_count']) <= 0:
@@ -198,7 +204,7 @@ def browse_products(client):
                     else:
                         print(f"ID: {item['id']} | {item['name']} - £{item['price']}/ea ({item['stock_count']} in stock!)")
 
-            print("\n---------------------------------------------\n")
+            print("\n------------------------------------------------\n")
             inspect_item = input("Input an Item ID to view details before adding to cart. Press 'Enter' to return to browsing options.: ")
 
             if inspect_item:
@@ -211,17 +217,18 @@ def browse_products(client):
                     discount = float(item_details['sale_discount'])
                     final_price = normal_price - (discount * normal_price) if discount > 0 else normal_price
 
-                    print(f"\n-----------------------------------------------------------")
+                    print(f"\n------------------------------------------------")
                     print(f"Product Title: {item_details['name']}")
                     print(f"Product Description: {item_details['description']}")
 
                     if qty_in_stock <= 0:
                         print("*OUT OF STOCK*")
-                        print("This item cannot be added to your basket.")
+                        print(f"------------------------------------------------")
+                        print("This item cannot be added to your basket. Returning to item browser.")
                     else:
                         print(f"Price: £{final_price:.2f}" + (f"({discount * 100}% Off!)" if discount > 0 else ""))
                         print(f"Quantity in stock: {item_details['stock_count']}")
-                        print(f"-----------------------------------------------------------")
+                        print(f"------------------------------------------------")
 
                         add_to_basket = input("Add this item to your basket? (y/n): ")
                         # Might as well support uppercase.
@@ -238,7 +245,6 @@ def browse_products(client):
         else:
             print("Could not load products at this time, check back later.")
 
-
 def main():
     # Creates a session to keep the user logged in
     client = requests.Session()
@@ -249,6 +255,7 @@ def main():
     print("\n")
 
     while True:
+        print("-------------------------| /^.^/ Welcome to Console Mart! /^.^/ |-----------------------\n")
         if logged_in:
             print("1) Logout")
             print("2) Check Basket")
@@ -267,28 +274,27 @@ def main():
         # Only logged in users can see their basket and make purchases.
         if command == '1':
             if logged_in:
-                print("\nLogout Screen -------------------\n")
+                print("\n-------------------------|Logout Interface|-----------------------\n")
                 logged_in = logout(client)
             else:
-                print("\nLogin Screen --------------------\n")
+                print("\n-------------------------|Login Interface|-----------------------\n")
                 logged_in = login(client)
 
         # This command is either register or check basket depending on if a user is logged in or not.
         elif command == '2':
             if logged_in:
-                print("\nBasket Screen -----------------\n")
+                print("\n-------------------------|Shopping Basket|-----------------------\n")
                 view_basket(client)
             else:
-                print("\nRegister Screen ------------------\n")
+                print("\n-------------------------|Register Interface|-----------------------\n")
                 logged_in = register(client)
    
         elif command == '3':
-            print("\nShopping Screen----------------------")
             browse_products(client)
 
         elif command == '4':
             if logged_in:
-                print("\nOrder History----------------------")
+                print("\n-------------------------|Order History|-----------------------")
                 view_orders(client)
 
             # If the user isnt logged in, they can't view previous orders.
@@ -296,7 +302,7 @@ def main():
                 print("\nError: command not found. Usage examples: | Enter <1> for login | Enter <exit> to close application |")
 
         elif command == 'exit':
-            print("\nExit Message------------------------")
+            print("\n-------------------------| ^.^ Thankyou for shopping! ^.^ |-----------------------")
             break
         else:
             print("\nError: command not found. Usage examples: | Enter <1> for login | Enter <exit> to close application |")
