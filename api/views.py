@@ -184,6 +184,11 @@ def shopping_basket(request):
 
         # Must check existing basket items against stock to check order can be fulfilled.
         if basket_item.quantity + 1 > item_request.stock_count:
+            # This fixed a bug where 0qty items were still added to basket. If basket_item_created exists
+            # then its the first time the item has been added to the basket.
+            # In this case, 0 + 1 > 0 therefore we can be certain there's 0 in stock to add.
+            if basket_item_created:
+                basket_item.delete()
             return JsonResponse({
                 'error': f'\n>>> Maximum quantity reached.\n'
             }, status=400)
