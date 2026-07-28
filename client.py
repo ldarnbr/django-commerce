@@ -1,11 +1,12 @@
 import requests
+import getpass
 
 URL = 'http://127.0.0.1:8000/api'
 
 def login(client):
     # Prompt the user for login info.
     username = input("Enter your username: \n")
-    password = input("Enter your password: \n")
+    password = getpass.getpass("Enter your password: \n")
 
     # Package the credentials in a dictionary.
     credentials = {
@@ -35,7 +36,7 @@ def logout(client):
 def register(client):
     # Prompt the user for login info.
     username = input("Create a unique username: \n")
-    password = input("Create a password \n")
+    password = getpass.getpass("Create a password \n")
 
     # Package the credentials in a dictionary.
     credentials = {
