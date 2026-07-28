@@ -6,7 +6,7 @@ This is an interactive command line interface built with Python and the requests
 ## Setup Instructions
 1. Clone the repository to your local machine.
 ```bash
-git clone [https://github.com/ldarnbr/django-commerce.git](https://github.com/ldarnbr/django-commerce.git)
+git clone https://github.com/ldarnbr/django-commerce.git
 cd <path/to/repo/directory>
 ```
 2. Create a virtual environment to store project dependencies.
