@@ -29,15 +29,19 @@ pip install -r requirements.txt
 ```bash
 python manage.py migrate
 ```
-6. Create the Admin account.
+6. Populate with the fake product data.
+```bash
+python manage.py loaddata items_seed.json
+```
+7. Create the Admin account.
 ```bash
 python manage.py createsuperuser
 ```
-7. Run the back-end server.
+8. Run the back-end server.
 ```bash
 python manage.py runserver
 ```
-8. Run the client script.
+9. Run the client script.
 ```bash
 # Open a new terminal and type the following command:
 python client.py
