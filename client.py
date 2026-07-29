@@ -136,8 +136,9 @@ def view_orders(client):
             return
         for order in orders:
             timestamp = order['order_date']
-            # Only need up to the minute.
-            formatted_date = timestamp[0:16]
+            # https://stackoverflow.com/questions/51462050/how-to-remove-t-and-z-in-time-in-python
+            # Only need up to the minute. Replaced T with whitespace to make a bit cleaner.
+            formatted_date = timestamp[0:16].replace("T", " ")
             print(f"\nOrder ID: {order['order_id']}")
             print(f"Order date: {formatted_date}")
             print(f"\nItems:")
