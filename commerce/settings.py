@@ -105,7 +105,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+# Time zone was off for order timestamps. Manually set to British time but ideally will 
+# be the time zone of the user. I found this reference on how to do it via JavaScript so a full release
+# would implement that feature. Right now the client application just uses requests via CLI.
+# https://www.loopwerk.io/articles/2025/django-local-times/
+TIME_ZONE = 'Europe/London'
 
 USE_I18N = True
 

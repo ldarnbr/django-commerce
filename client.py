@@ -135,7 +135,12 @@ def view_orders(client):
             print("\nNo order history\n")
             return
         for order in orders:
-            print(f"\nOrder ID: {order['order_id']}:")
+            timestamp = order['order_date']
+            # Only need up to the minute.
+            formatted_date = timestamp[0:16]
+            print(f"\nOrder ID: {order['order_id']}")
+            print(f"Order date: {formatted_date}")
+            print(f"\nItems:")
             combined_total = 0.0
 
             for item in order['items']:

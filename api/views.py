@@ -308,6 +308,8 @@ def view_orders(request):
 
             orders_information.append({
                 'order_id': order.id,
+                # https://docs.python.org/3/library/datetime.html#datetime.datetime.isoformat
+                'order_date': order.order_date.isoformat(),
                 'items': items
             })
 
