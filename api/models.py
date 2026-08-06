@@ -21,6 +21,9 @@ class ShoppingBasket(models.Model):
     # is removed.
     customer = models.OneToOneField(User, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return f"Belongs to: {self.customer.username}"
+
 class BasketItem(models.Model):
     # All basket items link to an item class. If the item is removed, delete the
     # instances of the items in users baskets.
@@ -32,6 +35,9 @@ class Order(models.Model):
     customer = models.ForeignKey(User, on_delete=models.CASCADE)
     # https://stackoverflow.com/questions/8016412/in-django-do-models-have-a-default-timestamp-field
     order_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.id}"
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)

@@ -18,7 +18,8 @@ class BasketItemAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'customer')
+    list_display = ('order_date', 'id', 'customer')
+    list_filter = ('order_date',)
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
